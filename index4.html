@@ -2,46 +2,49 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <title>Poseidon - Krok 4 (Vysílače)</title>
+    <title>Poseidon - Krok 4 (Vysílače) - Responzivní</title>
     <style>
-        :root { --enika-blue: #0055a5; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Segoe UI', sans-serif; overflow: hidden; background: #1a1a1a; }
+        :root { --enika-blue: #0055a5; --enika-orange: #e67e22; }
+        
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            font-family: 'Segoe UI', sans-serif; background: #1a1a1a; 
+            overflow: hidden; display: flex; justify-content: center; align-items: center; 
+        }
 
-        .app-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        /* --- HLAVNÍ KONTEJNER (Poměr 16:9) --- */
+        .scene-container {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            height: 100vh;
+            max-width: 100vw;
             background: url('PA_1.jpg') no-repeat center center;
-            background-size: contain; z-index: 1;
+            background-size: cover;
+            z-index: 1;
         }
 
-        .top-menu-btn { 
-            position: fixed; top: 5px; right: 150px; z-index: 10000; 
-            background: #f0f0f0; border: 1px solid #ccc; padding: 2px 12px; 
-            font-size: 12px; cursor: pointer; border-radius: 3px; font-weight: bold; 
-        }
-
-        /* --- PŘIJÍMAČE (již umístěné vlevo) --- */
+        /* --- PŘIJÍMAČE (Vlevo v projektu) --- */
         .device-placed {
             position: absolute;
-            width: 130px; padding: 10px;
-            background: #e8f4ff; /* Světle modrá - jsou už v projektu */
-            border: 1px solid var(--enika-blue);
-            border-radius: 5px; z-index: 500;
-            font-size: 12px; opacity: 0.8;
+            width: 8%; min-width: 110px; padding: 10px;
+            background: #e8f4ff; border: 1px solid var(--enika-blue);
+            border-radius: 5px; z-index: 500; font-size: 11px; opacity: 0.9;
         }
         .device-placed b { color: var(--enika-blue); }
 
-        /* --- NOVÝ VYSÍLAČ --- */
+        /* --- NOVÝ VYSÍLAČ ŠTÍTEK --- */
         .detected-area-label {
             position: absolute;
-            top: 210px; left: 500px;
+            top: 31%; left: 30%;
             color: white; font-size: 11px; font-weight: bold; text-transform: uppercase;
-            z-index: 1050; background: #e67e22; 
+            z-index: 1050; background: var(--enika-orange); 
             padding: 2px 8px; border-radius: 3px;
         }
 
+        /* --- SPOTLIGHT & BUBLINA --- */
         .anchor-point {
             position: absolute;
-            top: 210px; left: 500px; width: 200px; height: 150px;
+            top: 30%; left: 29%; width: 20%; height: 30%;
             z-index: 1000;
         }
 
@@ -54,54 +57,62 @@
 
         .guide-bubble {
             position: absolute;
-            top: 0; left: 220px; 
+            top: 0; left: 110%; 
             background: white; padding: 20px; border-radius: 10px;
-            width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border-left: 8px solid #e67e22;
+            width: 280px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-left: 8px solid var(--enika-orange);
         }
 
+        /* --- VYSÍLAČ (DRAG & DROP) --- */
         .device-new {
             position: absolute;
-            width: 140px; padding: 10px;
-            background: #fffdf0; border: 1px solid #d35400;
+            width: 8%; min-width: 120px; padding: 10px;
+            background: #fffdf0; border: 1px solid var(--enika-orange);
             border-radius: 5px; cursor: move;
             z-index: 1100; box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            font-size: 12px;
+            font-size: 11px;
         }
-        .device-new b { color: #d35400; }
+        .device-new b { color: var(--enika-orange); }
+
+        .top-menu-btn { 
+            position: absolute; top: 5px; right: 20px; z-index: 10000; 
+            background: #f0f0f0; border: 1px solid #ccc; padding: 2px 12px; 
+            font-size: 12px; cursor: pointer; border-radius: 3px; font-weight: bold; 
+        }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <button class="top-menu-btn" onclick="window.location.href='index.html'">⚙️ Volba profilu</button>
-    <div class="app-bg"></div>
+    <div class="scene-container" id="main-scene">
+        <button class="top-menu-btn" onclick="window.location.href='index.html'">⚙️ Volba profilu</button>
 
-    <div class="device-placed" style="top: 150px; left: 120px;">
-        <b>P8 R 2 DIN</b><br>ID: 4A55
-    </div>
-    <div class="device-placed" style="top: 210px; left: 120px;">
-        <b>P8 R 1 ON/OFF</b><br>ID: 12BC
-    </div>
-
-    <div id="detected-label" class="detected-area-label">Vyhledané vysílače</div>
-
-    <div id="step-4-container" class="anchor-point">
-        <div class="spotlight"></div>
-        <div class="guide-bubble">
-            <h3 style="margin-top:0; color: #d35400; font-size: 16px;">Krok 4: Přidání vysílačů</h3>
-            <p style="font-size: 13px;">Přijímače už máte v projektu (vlevo).</p>
-            <p style="font-size: 13px;">Nyní k nim <b>přesuňte</b> tento nový vysílač.</p>
+        <div class="device-placed" style="top: 20%; left: 2%;">
+            <b>P8 R 2 DIN</b><br>ID: 4A55
         </div>
-    </div>
+        <div class="device-placed" style="top: 30%; left: 2%;">
+            <b>P8 R 1 ON/OFF</b><br>ID: 12BC
+        </div>
 
-    <div id="trans1" class="device-new" style="top: 230px; left: 520px;" onmousedown="dragElement(this)">
-        <b>P8 T 4 multi</b><br>ID: 88F1<br><small>Tlačítkový vysílač</small>
+        <div id="detected-label" class="detected-area-label">Vyhledané vysílače</div>
+
+        <div id="step-4-container" class="anchor-point">
+            <div class="spotlight"></div>
+            <div class="guide-bubble">
+                <h3 style="margin-top:0; color: var(--enika-orange); font-size: 16px;">Krok 4: Přidání vysílačů</h3>
+                <p style="font-size: 13px;">Přijímače už máte v projektu (vlevo).</p>
+                <p style="font-size: 13px;">Nyní k nim <b>přesuňte</b> tento nový vysílač.</p>
+            </div>
+        </div>
+
+        <div id="trans1" class="device-new" style="top: 35%; left: 30%;" onmousedown="dragElement(this)">
+            <b>P8 T 4 multi</b><br>ID: 88F1<br><small>Tlačítkový vysílač</small>
+        </div>
     </div>
 
     <script>
         function dragElement(elmnt) {
-            var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
             elmnt.onmousedown = dragMouseDown;
 
             function dragMouseDown(e) {
@@ -112,7 +123,6 @@
                 document.onmouseup = closeDragElement;
                 document.onmousemove = elementDrag;
                 
-                document.getElementById('step-3-container')?.classList.add('hidden'); // Fix pro případné staré ID
                 document.getElementById('step-4-container').classList.add('hidden');
                 document.getElementById('detected-label').classList.add('hidden');
             }
@@ -132,12 +142,16 @@
                 document.onmouseup = null;
                 document.onmousemove = null;
 
-                if (parseInt(elmnt.style.left) < 450) {
+                // Kontrola, zda byl vysílač přetažen do levé části projektu
+                const sceneWidth = document.getElementById('main-scene').offsetWidth;
+                const currentLeft = elmnt.offsetLeft;
+
+                if (currentLeft < (sceneWidth * 0.25)) {
                     setTimeout(() => {
                         if (confirm("Zařízení jsou připravena. Chcete nyní vytvořit vazby?")) {
                             window.location.href = "index5.html"; 
                         }
-                    }, 500);
+                    }, 300);
                 }
             }
         }

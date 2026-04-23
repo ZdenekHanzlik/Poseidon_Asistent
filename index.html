@@ -2,42 +2,81 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <title>Poseidon - Čistá plocha</title>
+    <title>Poseidon - Responzivní start</title>
     <style>
         :root { --enika-blue: #0055a5; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; overflow: hidden; background: #1a1a1a; }
-
-        .app-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('PA_1.jpg') no-repeat center center;
-            background-size: contain; z-index: 1;
+        
+        /* Základní nastavení, aby aplikace vyplnila obrazovku a centrovala obsah */
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            background: #1a1a1a; 
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* --- SYSTÉMOVÁ OKNA --- */
+        /* --- TENTO KONTEJNER DRŽÍ POMĚR STRAN OBRÁZKU (16:9) --- */
+        .scene-container {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            height: 100vh;      /* Roztáhne se na výšku okna */
+            max-width: 100vw;   /* Ale ne víc než je šířka okna */
+            background: url('PA_1.jpg') no-repeat center center;
+            background-size: cover;
+            z-index: 1;
+        }
+
+        /* --- PRŮVODCE (Vázaný na scénu) --- */
+        /* Hodnoty top/left/width v % nyní přesně odpovídají místům na obrázku */
+        .spotlight { 
+            position: absolute; 
+            top: 5%;    /* Přesně na liště Nastavení */
+            left: 8%; 
+            width: 6%; 
+            height: 6%; 
+            border: 3px solid white; 
+            box-shadow: 0 0 15px white, 0 0 0 5000px rgba(0,0,0,0.6); 
+            border-radius: 5px; 
+            z-index: 55; 
+            cursor: pointer; 
+            display: none; 
+        }
+
+        .guide-bubble { 
+            position: absolute; 
+            top: 11%; 
+            left: 23.8%; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            width: 18%; /* Šířka bubliny se mění s velikostí scény */
+            min-width: 200px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            border-left: 8px solid var(--enika-blue); 
+            z-index: 60; 
+            display: none; 
+        }
+
+        /* --- SYSTÉMOVÁ OKNA (Modály jsou fixní na střed prohlížeče) --- */
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; justify-content: center; align-items: center; }
-        .modal-welcome { background: white; padding: 40px; border-radius: 15px; text-align: center; border-top: 10px solid var(--enika-blue); width: 350px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .modal-welcome { background: white; padding: 40px; border-radius: 15px; text-align: center; border-top: 10px solid var(--enika-blue); width: 320px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
 
         #comm-window, #name-window, #save-as-window, #open-project-window {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #f0f0f0; border: 1px solid #777; width: 420px; z-index: 1100;
+            background: #f0f0f0; border: 1px solid #777; width: 90%; max-width: 420px; z-index: 1100;
             box-shadow: 0 15px 40px rgba(0,0,0,0.8); display: none; font-size: 13px;
         }
+        
         .win-header { background: white; padding: 6px 10px; font-weight: bold; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; }
         .win-body { padding: 20px; }
 
         .btn-blue { background: var(--enika-blue); color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; }
         .btn-gray { background: #e1e1e1; border: 1px solid #adadad; padding: 5px 12px; cursor: pointer; min-width: 80px; font-size: 12px; }
-        .btn-gray:hover { background: #f5f5f5; }
+
+        .top-menu-btn { position: absolute; top: 5px; right: 20px; z-index: 100; background: #f0f0f0; border: 1px solid #ccc; padding: 2px 12px; font-size: 12px; cursor: pointer; border-radius: 3px; font-weight: bold; }
         .hidden { display: none !important; }
-
-        /* PRŮVODCE */
-        .spotlight { position: absolute; border: 3px solid white; box-shadow: 0 0 20px white, 0 0 0 5000px rgba(0,0,0,0.6); border-radius: 5px; z-index: 55; cursor: pointer; top: 25px; left: 245px; width: 85px; height: 50px; display: none; }
-        .guide-bubble { position: absolute; background: white; padding: 20px; border-radius: 10px; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-left: 8px solid var(--enika-blue); z-index: 60; display: none; }
-        .top-menu-btn { position: absolute; top: 5px; right: 150px; z-index: 100; background: #f0f0f0; border: 1px solid #ccc; padding: 2px 12px; font-size: 12px; cursor: pointer; border-radius: 3px; font-weight: bold; }
-
-        /* --- EDITOR PLOCHA --- */
-        #editor-surface { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 500; display: none; }
-
         .file-list { background: white; border: 1px solid #ccc; height: 150px; overflow-y: auto; margin: 10px 0; padding: 5px; }
         .file-item { padding: 6px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px; }
         .file-item.selected { background: #cfe9ff; }
@@ -45,8 +84,17 @@
 </head>
 <body>
 
-    <button class="top-menu-btn" onclick="location.reload()">⚙️ Volba profilu</button>
-    <div class="app-bg"></div>
+    <div class="scene-container">
+        <button class="top-menu-btn" onclick="location.reload()">⚙️ Volba profilu</button>
+        
+        <div id="active-spotlight" class="spotlight" onclick="openCommWindow()"></div>
+        
+        <div id="guide-bubble" class="guide-bubble">
+            <h3 style="margin-top:0; color: var(--enika-blue); font-size: 16px;">Krok 1: Připojení USB</h3>
+            <p style="font-size: 13px;">Připojte vysílač <b>P8 TR USB</b> do PC.</p>
+            <p style="font-size: 13px;">Poté klikněte na tlačítko <b>Nastavení</b> v horní liště.</p>
+        </div>
+    </div>
 
     <div id="overlay-start" class="overlay">
         <div class="modal-welcome">
@@ -54,13 +102,6 @@
             <button class="btn-blue" onclick="initStep1()">Jsem začátečník</button>
             <button class="btn-gray" style="width: 100%; padding: 10px;" onclick="closeAllOverlays()">Jsem pokročilý</button>
         </div>
-    </div>
-
-    <div id="active-spotlight" class="spotlight" onclick="openCommWindow()"></div>
-    <div id="guide-bubble" class="guide-bubble" style="top: 80px; left: 245px;">
-        <h3 style="margin-top:0; color: var(--enika-blue);">Krok 1: Připojení USB</h3>
-        <p>Připojte vysílač <b>P8 TR USB</b> do PC.</p>
-        <p>Poté klikněte na tlačítko <b>Nastavení</b> v horní liště.</p>
     </div>
 
     <div id="comm-window">
@@ -84,7 +125,7 @@
         <div class="win-header"><span>Nový projekt</span><span style="cursor:pointer" onclick="closeWindow('name-window')">✕</span></div>
         <div class="win-body">
             <p>Název projektu:</p>
-            <input type="text" id="project-name-input" style="width:94%; padding:8px;" placeholder="Můj_Projekt_01">
+            <input type="text" id="project-name-input" style="width:90%; padding:8px;" placeholder="Můj_Projekt_01">
             <div style="text-align: right; margin-top: 15px;"><button class="btn-blue" style="width: auto;" onclick="showSaveAs()">Další</button></div>
         </div>
     </div>
@@ -94,7 +135,7 @@
         <div class="win-body">
             <div style="background: white; border: 1px solid #ccc; padding: 8px; margin-bottom: 10px; font-size: 11px; color: #666;">📁 Dokumenty > Poseidon Projects</div>
             <p>Název souboru:</p>
-            <input type="text" id="final-filename" style="width:94%; padding:8px;" disabled>
+            <input type="text" id="final-filename" style="width:90%; padding:8px;" disabled>
             <div style="text-align: right; margin-top: 20px;"><button class="btn-blue" style="width: 100px;" onclick="finalizeAction()">Uložit</button> <button class="btn-gray" onclick="closeWindow('save-as-window')">Storno</button></div>
         </div>
     </div>
@@ -112,8 +153,6 @@
             </div>
         </div>
     </div>
-
-    <div id="editor-surface"></div>
 
     <script>
         function initStep1() { 
@@ -136,8 +175,11 @@
 
         function searchPort() {
             setTimeout(() => {
-                document.getElementById('port-name').innerText = "COM 99 (P8 TR USB)";
-                document.getElementById('port-name').style.color = "green";
+                const port = document.getElementById('port-name');
+                if(port) {
+                    port.innerText = "COM 99 (P8 TR USB)";
+                    port.style.color = "green";
+                }
                 document.getElementById('btn-connect').disabled = false;
             }, 1200);
         }
@@ -173,14 +215,10 @@
         function closeWindow(id) { document.getElementById(id).style.display = 'none'; }
 
         function finalizeAction() {
-    // Tady můžeme volitelně uložit data (např. název projektu) do localStorage, 
-    // aby si je index1.html mohl přečíst
-    const projectName = document.getElementById('project-name-input').value || "Můj_Projekt";
-    localStorage.setItem('currentProject', projectName);
-
-    // Přesměrování na nový soubor
-    window.location.href = "index1.html";
-}
+            const projectName = document.getElementById('project-name-input').value || "Můj_Projekt";
+            localStorage.setItem('currentProject', projectName);
+            window.location.href = "index1.html";
+        }
     </script>
 </body>
 </html>
