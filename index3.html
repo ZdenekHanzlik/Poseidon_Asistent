@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Poseidon - Krok 4</title>
+    <style>
+        :root { --enika-blue: #0055a5; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Segoe UI', sans-serif; overflow: hidden; background: #1a1a1a; }
+
+        .app-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('PA_1.jpg') no-repeat center center;
+            background-size: contain; z-index: 1;
+        }
+
+        /* --- SPOLEČNÝ KONTEJNER PRO POZICI --- */
+        .anchor-point {
+            position: absolute;
+            /* Tady nastavíš pozici jen JEDNOU */
+            top: 120px; 
+            left: 360px; 
+            width: 100px; 
+            height: 30px;
+            z-index: 1000;
+        }
+
+        /* Průhledná zóna pro klik (roztažená na 100% kontejneru) */
+        .click-trigger {
+            position: absolute;
+            width: 100%; height: 100%;
+            cursor: pointer;
+            z-index: 10;
+            background: rgba(0, 255, 0, 0); /* Dej 0.3 pro kontrolu pozice */
+        }
+
+        /* Spotlight (roztažený na 100% kontejneru) */
+        .spotlight {
+            position: absolute;
+            width: 100%; height: 100%;
+            border: 3px solid white;
+            box-shadow: 0 0 20px white, 0 0 0 5000px rgba(0,0,0,0.7);
+            border-radius: 5px;
+            pointer-events: none; /* Aby neblokoval klikání na click-trigger */
+        }
+
+        /* Bublina je vázaná na kontejner, takže se posouvá s ním */
+        .guide-bubble {
+            position: absolute;
+            top: 60px; left: 0;
+            background: white; padding: 20px; border-radius: 10px;
+            width: 280px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-left: 8px solid var(--enika-blue);
+        }
+
+        /* --- MODÁLNÍ OKNO --- */
+        #search-window {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #f0f0f0; border: 1px solid #777; width: 420px; z-index: 2000;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8); display: none;
+        }
+        .win-header { background: white; padding: 6px 10px; font-weight: bold; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; }
+        .win-body { padding: 20px; text-align: center; }
+
+        .hidden { display: none !important; }
+
+        .top-menu-btn { 
+    position: absolute; 
+    top: 5px; 
+    right: 150px; 
+    z-index: 100; 
+    background: #f0f0f0; 
+    border: 1px solid #ccc; 
+    padding: 2px 12px; 
+    font-size: 12px; 
+    cursor: pointer; 
+    border-radius: 3px; 
+    font-weight: bold; 
+}
+.top-menu-btn:hover { background: #e5e5e5; }
+    </style>
+</head>
+<body>
+
+    <body>
+    <button class="top-menu-btn" onclick="goToStart()">⚙️ Volba profilu</button>
+    
+    <div class="app-bg"></div>
+
+    
+    <div id="step-2-container" class="anchor-point">
+        <div class="click-trigger" onclick="startSearching()"></div>
+        <div class="spotlight"></div>
+        <div class="guide-bubble">
+            <h3 style="margin-top:0; color: var(--enika-blue); font-size: 16px;">Krok 4: Vyhledání bateriových zařízení</h3>
+            <p style="font-size: 13px;">Klikněte na tlačítko <b>Poslouchat</b>.</p>
+            <p style="font-size: 13px;">Stiskněte na zařízení jakékoliv tlačítko dvahrát za sebou. Cvak, cvak.</p>
+            
+        </div>
+    </div>
+
+    <div id="search-window">
+        <div class="win-header"><span>Vyhledávání...</span><span style="cursor:pointer" onclick="closeWindow()">✕</span></div>
+        <div class="win-body">
+            <p>Hledám bateriové zařízení</p>
+            <div id="loader" style="margin: 20px;">⏳</div>
+            <button onclick="location.reload()" class="hidden" id="btn-next">Pokračovat</button>
+        </div>
+    </div>
+
+    <script>
+       function startSearching() {
+    // 1. Skryjeme naváděcí bublinu kroku 2
+    document.getElementById('step-2-container').classList.add('hidden');
+    
+    // 2. Zobrazíme okno vyhledávání
+    const win = document.getElementById('search-window');
+    win.style.display = 'block';
+    
+    // 3. Simulace hledání (trvá např. 2 sekundy)
+    setTimeout(() => {
+        document.getElementById('loader').innerHTML = "<b>Nalezena 2 zařízení!</b>";
+        
+        // 4. AUTOMATICKÝ PŘECHOD
+        // Počkáme ještě vteřinu, aby uživatel stihl přečíst výsledek, a pak jdeme na index2.html
+        setTimeout(() => {
+            window.location.href = "index4.html";
+        }, 1500); 
+
+    }, 2000);
+}
+
+        function closeWindow() {
+            document.getElementById('search-window').style.display = 'none';
+        }
+
+        function goToStart() {
+    // Pokud chcete při návratu smazat i data o projektu:
+    // localStorage.removeItem('currentProject'); 
+    window.location.href = "index.html";
+}
+    </script>
+</body>
+</html>
