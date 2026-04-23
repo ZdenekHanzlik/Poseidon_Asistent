@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Poseidon - Krok 3</title>
+    <style>
+        :root { --enika-blue: #0055a5; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Segoe UI', sans-serif; overflow: hidden; background: #1a1a1a; }
+
+        .app-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('PA_1.jpg') no-repeat center center;
+            background-size: contain; z-index: 1;
+        }
+
+        .top-menu-btn { 
+            position: fixed; top: 5px; right: 150px; z-index: 10000; 
+            background: #f0f0f0; border: 1px solid #ccc; padding: 2px 12px; 
+            font-size: 12px; cursor: pointer; border-radius: 3px; font-weight: bold; 
+        }
+
+        /* --- PROSTOR PRO NALEZENÁ ZAŘÍZENÍ --- */
+        .detected-area-label {
+            position: absolute;
+            top: 210px; left: 540px;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 1050;
+            background: var(--enika-blue);
+            padding: 2px 8px;
+            border-radius: 3px;
+        }
+
+        .anchor-point {
+            position: absolute;
+            top: 200px; left: 530px; width: 180px; height: 250px;
+            z-index: 1000;
+        }
+
+        .spotlight {
+            position: absolute; width: 100%; height: 100%;
+            border: 2px dashed white;
+            box-shadow: 0 0 20px white, 0 0 0 5000px rgba(0,0,0,0.7);
+            border-radius: 5px; pointer-events: none;
+        }
+
+        .guide-bubble {
+            position: absolute;
+            top: 0; left: 200px; 
+            background: white; padding: 20px; border-radius: 10px;
+            width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-left: 8px solid var(--enika-blue);
+        }
+
+        .device {
+            position: absolute;
+            width: 130px;
+            padding: 10px;
+            background: white;
+            border: 1px solid #777;
+            border-radius: 5px;
+            cursor: move;
+            z-index: 1100;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            font-size: 12px;
+            transition: transform 0.1s;
+        }
+        .device:hover { transform: scale(1.02); }
+        .device b { color: var(--enika-blue); }
+        .hidden { display: none !important; }
+
+    </style>
+</head>
+<body>
+
+    <button class="top-menu-btn" onclick="window.location.href='index.html'">⚙️ Volba profilu</button>
+    <div class="app-bg"></div>
+
+    <div id="detected-label" class="detected-area-label">Vyhledaná zařízení</div>
+
+    <div id="step-3-container" class="anchor-point">
+        <div class="spotlight"></div>
+        <div class="guide-bubble">
+            <h3 style="margin-top:0; color: var(--enika-blue); font-size: 16px;">Krok 3: Vložení do projektu</h3>
+            <p style="font-size: 13px;">Zařízení se po vyhledání objevila v seznamu <b>Vyhledaná zařízení</b>.</p>
+            <p style="font-size: 13px;">Nyní je vložte do projektu <b>přesunutím</b> myší do levého okna.</p>
+            <button class="top-menu-btn" style="position:static; margin-top:10px;" onclick="finishStep3()">Hotovo</button>
+        </div>
+    </div>
+
+    <div id="dev1" class="device" style="top: 250px; left: 550px;" onmousedown="dragElement(this)">
+        <b>P8 R 2 DIN</b><br>ID: 4A55
+    </div>
+
+    <div id="dev2" class="device" style="top: 330px; left: 550px;" onmousedown="dragElement(this)">
+        <b>P8 R 1 ON/OFF</b><br>ID: 12BC
+    </div>
+
+    <script>
+        // Přidáme počítadlo přesunutých zařízení
+let movedDevices = 0;
+const totalDevices = 2; // Máme P8 R 2 DIN a P8 R 1 ON/OFF
+
+function dragElement(elmnt) {
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    elmnt.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+        
+        // Skryjeme průvodce a štítek při prvním pohybu
+        document.getElementById('step-3-container').classList.add('hidden');
+        document.getElementById('detected-label').classList.add('hidden');
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
+
+        // --- LOGIKA AUTOMATICKÉHO PŘECHODU ---
+        // Zkontrolujeme, zda bylo zařízení přetaženo doleva (do "projektu")
+        // Předpokládáme, že levá strana projektu začíná pod 400px
+        if (parseInt(elmnt.style.left) < 450 && !elmnt.classList.contains('placed')) {
+            elmnt.classList.add('placed'); // Označíme jako umístěné
+            movedDevices++;
+            
+            // Pokud jsou všechna zařízení na místě, spustíme přechod
+            if (movedDevices === totalDevices) {
+                setTimeout(() => {
+                    // Můžeš zde zobrazit krátkou zprávu před přesměrováním
+                    alert("Všechny přijímače vloženy. Nyní vyhledáme vysílače.");
+                    window.location.href = "index3.html"; 
+                }, 500);
+            }
+        }
+    }
+}
+    </script>
+</body>
+</html>
