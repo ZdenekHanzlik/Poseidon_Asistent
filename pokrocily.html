@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Poseidon - Expert Mode</title>
+    <style>
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            font-family: 'Segoe UI', sans-serif; background: #1a1a1a; 
+            overflow: hidden; display: flex; justify-content: center; align-items: center; 
+        }
+
+        /* --- HLAVNÍ KONTEJNER (Poměr 16:9) --- */
+        .scene-container {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            height: 100vh;
+            max-width: 100vw;
+            background: url('PA_1.jpg') no-repeat center center;
+            background-size: cover;
+            z-index: 1;
+        }
+
+        /* --- TLAČÍTKO PRO NÁVRAT --- */
+        .top-menu-btn { 
+            position: absolute; 
+            top: 5px; 
+            right: 150px; /* Aby odpovídalo pozici v nápovědě */
+            z-index: 1000; 
+            background: #f0f0f0; 
+            border: 1px solid #ccc; 
+            padding: 2px 12px; 
+            font-size: 12px; 
+            cursor: pointer; 
+            border-radius: 3px; 
+            font-weight: bold; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .top-menu-btn:hover { background: #ffffff; border-color: #999; }
+    </style>
+</head>
+<body>
+
+    <div class="scene-container">
+        <button class="top-menu-btn" onclick="window.location.href='index.html'">⚙️ Volba profilu</button>
+    </div>
+
+</body>
+</html>

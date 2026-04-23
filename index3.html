@@ -75,12 +75,24 @@
             font-size: 12px; cursor: pointer; border-radius: 3px; font-weight: bold; 
         }
         .hidden { display: none !important; }
+
+        .detected-area-label1 {
+            position: absolute;
+            top: 20%; left: 1%; /* Pozice v rámci obrázku */
+            color: white; font-size: 11px; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 1px;
+            z-index: 1050; background: var(--enika-blue);
+            padding: 2px 8px; border-radius: 3px;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
 
     <div class="scene-container">
         <button class="top-menu-btn" onclick="goToStart()">⚙️ Volba profilu</button>
+
+           <div id="detected-label1" class="detected-area-label1">Zařízení v projektu</div>
 
         <div id="step-4-container" class="anchor-point">
             <div class="click-trigger" onclick="startSearching()"></div>
@@ -109,7 +121,7 @@
             
             setTimeout(() => {
                 document.getElementById('loader').style.display = 'none';
-                document.getElementById('result-text').innerHTML = "Nalezena 2 zařízení!";
+                document.getElementById('result-text').innerHTML = "Nalezeno 1 zařízení!";
                 
                 setTimeout(() => {
                     window.location.href = "index4.html";

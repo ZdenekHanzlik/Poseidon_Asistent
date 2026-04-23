@@ -66,7 +66,7 @@
         /* --- VYSÍLAČ (DRAG & DROP) --- */
         .device-new {
             position: absolute;
-            width: 8%; min-width: 120px; padding: 10px;
+            width: 8%; min-width: 110px; padding: 10px;
             background: #fffdf0; border: 1px solid var(--enika-orange);
             border-radius: 5px; cursor: move;
             z-index: 1100; box-shadow: 0 4px 8px rgba(0,0,0,0.3);
@@ -80,6 +80,16 @@
             font-size: 12px; cursor: pointer; border-radius: 3px; font-weight: bold; 
         }
         .hidden { display: none !important; }
+
+         .detected-area-label1 {
+            position: absolute;
+            top: 20%; left: 1%; /* Pozice v rámci obrázku */
+            color: white; font-size: 11px; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 1px;
+            z-index: 1050; background: var(--enika-blue);
+            padding: 2px 8px; border-radius: 3px;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -87,11 +97,13 @@
     <div class="scene-container" id="main-scene">
         <button class="top-menu-btn" onclick="window.location.href='index.html'">⚙️ Volba profilu</button>
 
-        <div class="device-placed" style="top: 20%; left: 2%;">
+          <div id="detected-label1" class="detected-area-label1">Zařízení v projektu</div>
+
+        <div class="device-placed" style="top: 25%; left: 2%;">
             <b>P8 R 2 DIN</b><br>ID: 4A55
         </div>
-        <div class="device-placed" style="top: 30%; left: 2%;">
-            <b>P8 R 1 ON/OFF</b><br>ID: 12BC
+        <div class="device-placed" style="top: 35%; left: 2%;">
+            <b>P8 R 1 I</b><br>ID: 12BC
         </div>
 
         <div id="detected-label" class="detected-area-label">Vyhledané vysílače</div>
@@ -106,7 +118,7 @@
         </div>
 
         <div id="trans1" class="device-new" style="top: 35%; left: 30%;" onmousedown="dragElement(this)">
-            <b>P8 T 4 multi</b><br>ID: 88F1<br><small>Tlačítkový vysílač</small>
+            <b>P8 T 2 MS 03</b><br>ID: 88F1<br><small>Tlačítkový vysílač</small>
         </div>
     </div>
 

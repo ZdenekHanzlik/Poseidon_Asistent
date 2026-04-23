@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Poseidon - Krok 5 (Vícenásobné vazby)</title>
+    <style>
+        :root { 
+            --enika-blue: #0055a5; 
+            --enika-orange: #e67e22;
+            --enika-green: #27ae60;
+        }
+        
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            font-family: 'Segoe UI', sans-serif; background: #1a1a1a; 
+            overflow: hidden; display: flex; justify-content: center; align-items: center; 
+        }
+
+        .scene-container {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            height: 100vh;
+            max-width: 100vw;
+            background: url('PA_2.jpg') no-repeat center center;
+            background-size: cover;
+            z-index: 1;
+        }
+
+        /* --- ZAŘÍZENÍ --- */
+        .device {
+            position: absolute;
+            width: 8%; min-width: 110px; padding: 10px;
+            background: white; border: 2px solid #ccc;
+            border-radius: 8px; cursor: pointer;
+            z-index: 1100; transition: all 0.2s;
+            font-size: 11px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        
+        .device.selected-rx { border-color: var(--enika-blue); box-shadow: 0 0 15px var(--enika-blue); transform: scale(1.05); }
+        .device.selected-tx { border-color: var(--enika-orange); box-shadow: 0 0 15px var(--enika-orange); transform: scale(1.05); }
+        
+        .device b { display: block; margin-bottom: 4px; }
+        .rx b { color: var(--enika-blue); }
+        .tx b { color: var(--enika-orange); }
+
+        /* --- NÁPOVĚDNÁ BUBLINA --- */
+        .guide-bubble {
+            position: absolute;
+            top: 5%; left: 50%; transform: translateX(-50%);
+            background: white; padding: 20px; border-radius: 10px;
+            width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            border-top: 8px solid var(--enika-blue);
+            z-index: 2000; text-align: center;
+        }
+
+        .binding-options {
+            display: none;
+            margin-top: 15px;
+            text-align: left;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        select { width: 100%; padding: 8px; margin: 8px 0 15px 0; border: 1px solid #ccc; border-radius: 4px; }
+
+        .bind-btn {
+            width: 100%; padding: 12px; background: var(--enika-green);
+            color: white; border: none; border-radius: 5px; font-weight: bold;
+            cursor: pointer; display: none; margin-bottom: 10px;
+        }
+        
+        .finish-btn {
+            width: 100%; padding: 10px; background: #333;
+            color: white; border: none; border-radius: 5px;
+            cursor: pointer; font-weight: bold; display: none;
+        }
+
+        .top-menu-btn { 
+            position: absolute; top: 5px; right: 20px; z-index: 10000; 
+            background: #f0f0f0; border: 1px solid #ccc; padding: 2px 12px; 
+            font-size: 12px; cursor: pointer; border-radius: 3px; font-weight: bold; 
+        }
+
+        .success-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); color: white;
+            display: none; flex-direction: column; justify-content: center;
+            align-items: center; z-index: 3000; text-align: center;
+        }
+
+         .detected-area-label1 {
+            position: absolute;
+            top: 20%; left: 1%; /* Pozice v rámci obrázku */
+            color: white; font-size: 11px; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 1px;
+            z-index: 1050; background: var(--enika-orange);
+            padding: 2px 8px; border-radius: 3px;
+            pointer-events: none;
+            }
+
+             .detected-area-label {
+            position: absolute;
+            top: 20%; left: 80%; /* Pozice v rámci obrázku */
+            color: white; font-size: 11px; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 1px;
+            z-index: 1050; background: var(--enika-blue);
+            padding: 2px 8px; border-radius: 3px;
+            pointer-events: none;
+            }
+    </style>
+</head>
+<body>
+
+    <div class="scene-container">
+        <button class="top-menu-btn" onclick="window.location.href='index.html'">⚙️ Volba profilu</button>
+
+        <div id="detected-label" class="detected-area-label">Přijímače</div>
+          <div id="detected-label1" class="detected-area-label1">Vysílače</div>
+
+        <div class="guide-bubble" id="main-guide">
+            <h3 id="guide-title" style="margin-top:0; color: #0055a5;">Vytváření vazeb</h3>
+            <p id="guide-text" style="font-size: 14px;">Vyberte <b>přijímač</b> vpravo a <b>vysílač</b> vlevo.</p>
+            
+<div id="channel-area" style="display: none;">
+    <label style="font-size: 12px; font-weight: bold;">Výběr kanálu přijímače:</label>
+    <select id="channel-select">
+        <option value="1">Kanál 1</option>
+        <option value="2">Kanál 2</option>
+    </select>
+</div>
+
+            <div id="options-area" class="binding-options">
+                <label style="font-size: 12px; font-weight: bold;">Tlačítka vysílače:</label>
+                <select id="button-select" onchange="updateFunctions()">
+                    <option value="none">-- Vyberte --</option>
+                    <option value="up">Horní tlačítko</option>
+                    <option value="down">Dolní tlačítko</option>
+                    <option value="both">Obě tlačítka (Pár)</option>
+                </select>
+
+                <label style="font-size: 12px; font-weight: bold;">Funkce:</label>
+                <select id="function-select">
+                    <option value="none">-- Vyberte funkci --</option>
+                </select>
+
+                <button id="bind-button" class="bind-btn" onclick="createBinding()">Uložit vazbu a nahrát do přístroje ✓</button>
+            </div>
+            
+            <button id="final-finish-btn" class="finish-btn" onclick="showFinalSuccess()">Ukončit a shrnutí projektu</button>
+        </div>
+
+        <div id="rx1" class="device rx" style="top: 25%; left: 80%;" onclick="selectRX('rx1')">
+            <b>P8 R 2 DIN</b>ID: 4A55<br><small>Stav: Bez vazeb</small>
+        </div>
+        <div id="rx2" class="device rx" style="top: 37%; left: 80%;" onclick="selectRX('rx2')">
+            <b>P8 R 1 I</b>ID: 12BC<br><small>Stav: Bez vazeb</small>
+        </div>
+
+        <div id="tx1" class="device tx" style="top: 25%; left: 1%;" onclick="selectTX('tx1')">
+            <b>P8 T 2 MS 03</b>ID: 88F1<br><small>Vysílač</small>
+        </div>
+    </div>
+
+    <div id="success-screen" class="success-overlay">
+        <div style="background: white; color: #333; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%;">
+            <h1 style="color: var(--enika-green); margin: 0 0 15px 0;">Projekt dokončen! 🎉</h1>
+            <div id="summary-text" style="margin-bottom: 20px;"></div>
+            <button onclick="window.location.href='index.html'" style="padding: 12px 25px; background: var(--enika-blue); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Začít nový projekt</button>
+            <button onclick="document.getElementById('success-screen').style.display='none'" style="padding: 12px 25px; background: var(--enika-blue); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+    Zpět do projektu
+</button>
+        </div>
+    </div>
+
+    <script>
+       let selectedRX = null;
+let selectedTX = null;
+let createdBindings = [];
+
+function selectRX(id) {
+    if (selectedRX) document.getElementById(selectedRX).classList.remove('selected-rx');
+    selectedRX = id;
+    document.getElementById(id).classList.add('selected-rx');
+    
+    // Logika zobrazení výběru kanálu
+    const channelArea = document.getElementById('channel-area');
+    if (id === 'rx1') { // P8 R 2 DIN má 2 kanály
+        channelArea.style.display = "block";
+    } else {
+        channelArea.style.display = "none";
+        document.getElementById('channel-select').value = "1"; // Reset na 1. kanál
+    }
+    
+    checkSelection();
+}
+
+function selectTX(id) {
+    if (selectedTX) document.getElementById(selectedTX).classList.remove('selected-tx');
+    selectedTX = id;
+    document.getElementById(id).classList.add('selected-tx');
+    checkSelection();
+}
+
+function checkSelection() {
+    if (selectedRX && selectedTX) {
+        document.getElementById('options-area').style.display = "block";
+        document.getElementById('guide-title').innerText = "Konfigurace parametrů";
+        document.getElementById('guide-text').innerHTML = "Zvolte kanál, tlačítka a funkci.";
+    }
+}
+
+function updateFunctions() {
+    const btnVal = document.getElementById('button-select').value;
+    const funcSelect = document.getElementById('function-select');
+    const bindBtn = document.getElementById('bind-button');
+    funcSelect.innerHTML = "";
+
+    if (btnVal === "up" || btnVal === "down") {
+        const ops = [
+            {v: "ON", t: "ZAPNOUT (ON)"},
+            {v: "OFF", t: "VYPNOUT (OFF)"},
+            {v: "ONOFF", t: "ZAPNOUT/VYPNOUT (Krok)"}
+        ];
+        ops.forEach(o => {
+            let opt = document.createElement("option");
+            opt.value = o.v; opt.text = o.t;
+            funcSelect.add(opt);
+        });
+        bindBtn.style.display = "block";
+    } else if (btnVal === "both") {
+        const pairOps = [
+            {v: "ONOFF_P", t: "Horní=ZAP, Dolní=VYP (ON+OFF)"},
+            {v: "OFFON_P", t: "Horní=VYP, Dolní=ZAP (OFF+ON)"}
+        ];
+        pairOps.forEach(o => {
+            let opt = document.createElement("option");
+            opt.value = o.v; opt.text = o.t;
+            funcSelect.add(opt);
+        });
+        bindBtn.style.display = "block";
+    } else {
+        bindBtn.style.display = "none";
+    }
+}
+
+function createBinding() {
+    // 1. Načtení dat z formuláře
+    const rxEl = document.getElementById(selectedRX);
+    const rxName = rxEl.querySelector('b').innerText;
+    const channelVal = document.getElementById('channel-select').value;
+    const btnText = document.getElementById('button-select').options[document.getElementById('button-select').selectedIndex].text;
+    const funcText = document.getElementById('function-select').options[document.getElementById('function-select').selectedIndex].text;
+
+    // 2. Uložení do pole v paměti
+    createdBindings.push({ 
+        rx: rxName, 
+        chan: channelVal,
+        btn: btnText, 
+        func: funcText 
+    });
+
+    // 3. Vizuální odezva na "krabičce" přijímače
+    const count = createdBindings.filter(b => b.rx === rxName).length;
+    rxEl.querySelector('small').innerHTML = `Vazeb: ${count}`;
+    rxEl.style.background = "#e8f5e9"; // Zelený nádech značící úspěch
+    rxEl.style.borderColor = "var(--enika-green)";
+
+    // 4. RESET UI - Tohle zajistí, že můžeš začít znovu
+    // Odznačíme vybrané prvky
+    document.getElementById(selectedRX).classList.remove('selected-rx');
+    document.getElementById(selectedTX).classList.remove('selected-tx');
+    
+    // Vynulujeme výběr v kódu
+    selectedRX = null;
+    selectedTX = null;
+
+    // Schováme nastavovací menu a resetujeme selecty
+    document.getElementById('options-area').style.display = "none";
+    document.getElementById('button-select').value = "none";
+    document.getElementById('function-select').innerHTML = '<option value="none">-- Vyberte funkci --</option>';
+    document.getElementById('bind-button').style.display = "none";
+
+    // 5. Aktualizace nápovědné bubliny
+    const title = document.getElementById('guide-title');
+    const text = document.getElementById('guide-text');
+    
+    title.innerText = "Vazba uložena ✓";
+    title.style.color = "var(--enika-green)";
+    text.innerHTML = "Můžete vybrat <b>další dvojici</b> (RX vpravo, TX vlevo) nebo projekt ukončit a zobrazit přehled.";
+
+    // 6. Zobrazení tlačítka pro odchod do index6 (pokud už tam není)
+    document.getElementById('final-finish-btn').style.display = "block";
+}
+
+function showFinalSuccess() {
+    const summary = document.getElementById('summary-text');
+    let listHtml = "<div style='text-align:left; background:#f5f5f5; padding:10px; border-radius:5px; max-height:200px; overflow-y:auto;'>";
+    createdBindings.forEach((b, i) => {
+        listHtml += `<div style='margin-bottom:8px; font-size:13px; border-bottom:1px solid #ddd;'>` +
+                    `${i+1}. <b>${b.rx} (K${b.chan})</b>: ${b.btn} → ${b.func}</div>`;
+    });
+    listHtml += "</div>";
+    summary.innerHTML = `<p>V projektu bylo celkem vytvořeno <b>${createdBindings.length}</b> vazeb:</p>${listHtml}`;
+    document.getElementById('success-screen').style.display = "flex";
+}
+    </script>
+</body>
+</html>
